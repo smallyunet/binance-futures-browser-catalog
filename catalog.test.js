@@ -33,4 +33,5 @@ test('filters unavailable metrics and sorts null values last', () => {
   assert.deepEqual(filterAndSort(rows, filters).map(row => row.symbol), ['BUSDT', 'AUSDT']);
   assert.deepEqual(filterAndSort(rows, { ...filters, minimumOpenInterest: '0' }).map(row => row.symbol), ['BUSDT']);
   assert.equal(externalLinks(rows[1]).length, 3);
+  assert.match(externalLinks(rows[1]).find(link => link.label === 'CMC lookup').url, /site%3Acoinmarketcap\.com%2Fcurrencies%2F/);
 });

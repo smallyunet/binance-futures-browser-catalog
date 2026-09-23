@@ -108,7 +108,7 @@ export function externalLinks(row) {
     { label: 'CoinGecko', url: row.coinGeckoId
       ? `https://www.coingecko.com/en/coins/${encodeURIComponent(row.coinGeckoId)}`
       : `https://www.coingecko.com/en/search?query=${token}` },
-    { label: 'CMC', url: `https://coinmarketcap.com/search/?q=${token}` },
+    { label: 'CMC lookup', url: `https://www.google.com/search?q=${encodeURIComponent(`site:coinmarketcap.com/currencies/ ${row.baseAsset}`)}` },
     { label: 'DexScreener', url: `https://dexscreener.com/search?q=${token}` },
   ].filter(Boolean);
 }

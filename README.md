@@ -10,6 +10,7 @@ A static GitHub Pages experiment that requests Binance Futures public market dat
 - If either Binance `exchangeInfo` request fails, the page labels its data **Partial**. Failed tickers leave their metrics blank. CoinGecko failures leave its metrics blank.
 - COIN-M 24-hour volume is intentionally blank because Binance's `baseVolume` is in base-asset units and is not comparable to USDⓈ-M quote volume.
 - Access depends on the visitor's network and Binance's availability and access rules. This experiment does not bypass provider restrictions.
+- CoinMarketCap has no verified token search URL for direct linking, so its per-token lookup opens a Google search restricted to CoinMarketCap currency pages. Symbol matches should be checked before relying on an asset identity.
 
 The page makes requests on load and on Refresh, with a two-minute in-memory cache. No credentials or user data are stored or transmitted by the site.
 
