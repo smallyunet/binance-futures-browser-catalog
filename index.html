@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explore active Binance Futures contracts with direct browser requests, filters, sorting, and research links.">
-  <meta name="theme-color" content="#0a111d">
-  <title>Futures Atlas · Binance contracts</title>
+  <meta name="theme-color" content="#f7f8fa">
+  <title>Binance Futures Catalog · Futures Atlas</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
@@ -13,53 +13,76 @@
 <body>
   <div class="site-shell">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Futures Atlas home"><span class="brand-mark">F<span class="brand-point">.</span></span><span>FUTURES <strong>ATLAS</strong></span></a>
-      <div class="topbar-right"><span class="live-dot" aria-hidden="true"></span><span>PUBLIC MARKET DATA</span><a class="top-link" href="https://github.com/smallyunet/binance-futures-browser-catalog" target="_blank" rel="noopener noreferrer">SOURCE ↗</a></div>
+      <a class="brand" href="./" aria-label="Futures Atlas home"><span class="brand-mark">F.</span><span>Futures Atlas</span></a>
+      <a class="github-link" href="https://github.com/smallyunet/binance-futures-browser-catalog" target="_blank" rel="noopener noreferrer">View source <span aria-hidden="true">↗</span></a>
     </header>
-
     <main>
-      <section class="hero">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="eyebrow-line"></span> INDEPENDENT RESEARCH / 001</div>
-          <h1>Every futures contract.<br><em>One clear view.</em></h1>
-          <p>Explore active Binance USDⓈ-M and COIN-M contracts. Sort the market, narrow your search, and open each asset in the tools you use.</p>
-          <div class="hero-actions"><button id="refresh" class="primary-button" type="button"><span aria-hidden="true">↻</span> Refresh market data</button><span id="updated" class="updated">Awaiting first request</span></div>
+      <div class="page-header">
+        <div>
+          <p class="eyebrow">INDEPENDENT RESEARCH <span aria-hidden="true">/</span> MARKET DATA</p>
+          <h1>Binance Futures Catalog</h1>
+          <p class="page-description">Active USDⓈ-M and COIN-M contracts, with Binance market data and optional CoinGecko metrics.</p>
         </div>
-        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="hero-art-center">₿<span>FUTURES<br>UNIVERSE</span></div></div>
-      </section>
-
-      <section class="status-section" aria-label="Data source status">
-        <div class="section-heading"><div><div class="overline">LIVE FEED</div><h2>Market snapshot</h2></div><span id="overall-status" class="overall-status waiting">Waiting for sources</span></div>
-        <div class="stat-grid">
-          <div class="stat-card"><div class="stat-label">ACTIVE CONTRACTS <span>01</span></div><div id="contract-count" class="stat-value">—</div><div class="stat-sub">Across available markets</div></div>
-          <div class="stat-card"><div class="stat-label">DISTINCT ASSETS <span>02</span></div><div id="asset-count" class="stat-value">—</div><div class="stat-sub">Unique base tokens</div></div>
-          <div class="stat-card"><div class="stat-label">MATCHING VIEW <span>03</span></div><div id="matching-count" class="stat-value">—</div><div class="stat-sub">After active filters</div></div>
-          <div class="stat-card accent-card"><div class="stat-label">SOURCE COVERAGE <span>04</span></div><div id="source-count" class="stat-value">—</div><div class="stat-sub">Direct browser requests</div></div>
+        <div class="header-actions">
+          <button id="refresh" class="button button-primary" type="button"><span aria-hidden="true">↻</span> Refresh data</button>
+          <span id="updated" class="updated">Awaiting first request</span>
         </div>
-        <div id="source-list" class="source-list" aria-live="polite"></div>
-        <div id="notice" class="notice" role="status">The browser requests Binance directly. Results depend on your network and provider availability.</div>
-      </section>
-
-      <section class="explorer" aria-labelledby="explorer-title">
-        <div class="section-heading explorer-heading"><div><div class="overline">CONTRACT EXPLORER</div><h2 id="explorer-title">Find your market</h2></div><button id="export" class="ghost-button" type="button" disabled>↓ Export filtered CSV</button></div>
+      </div>
+      <section class="catalog" aria-label="Contract catalog">
+        <div class="catalog-summary">
+          <div class="summary-counts" aria-live="polite">
+            <span><strong id="contract-count">—</strong> contracts</span><span class="summary-divider" aria-hidden="true"></span>
+            <span><strong id="asset-count">—</strong> tokens</span><span class="summary-divider" aria-hidden="true"></span>
+            <span><strong id="matching-count">—</strong> matching</span>
+          </div>
+          <span id="overall-status" class="overall-status waiting">Waiting for sources</span>
+        </div>
         <form id="filters" class="filter-panel" autocomplete="off">
-          <label class="search-field"><span>SEARCH CONTRACT OR TOKEN</span><input id="search" type="search" placeholder="e.g. BTC, SOLUSDT, bitcoin" aria-label="Search contract or token"></label>
-          <label><span>MARKET</span><select id="market"><option value="all">All markets</option><option value="USD-M">USDⓈ-M</option><option value="COIN-M">COIN-M</option></select></label>
-          <label><span>CONTRACT TYPE</span><select id="type"><option value="all">All types</option></select></label>
-          <label><span>QUOTE ASSET</span><select id="quote"><option value="all">All quotes</option></select></label>
-          <label><span>COINGECKO MATCH</span><select id="gecko"><option value="all">Any</option><option value="matched">Matched</option><option value="unmatched">Unmatched</option></select></label>
-          <label><span>MIN 24H QUOTE VOLUME</span><input id="minimumVolume" type="number" min="0" step="any" placeholder="Any"></label>
-          <label><span>MIN CG OPEN INTEREST (USD)</span><input id="minimumOpenInterest" type="number" min="0" step="any" placeholder="Any"></label>
-          <label><span>SORT BY</span><select id="sort"><option value="quoteVolume">Binance 24h quote volume</option><option value="openInterestUsd">CG open interest</option><option value="priceChangePercent">24h price change</option><option value="lastPrice">Last price</option><option value="fundingRate">CG funding rate</option><option value="onboardDate">Listed date</option><option value="symbol">Contract symbol</option><option value="baseAsset">Token</option></select></label>
-          <label><span>DIRECTION</span><select id="direction"><option value="desc">Descending</option><option value="asc">Ascending</option></select></label>
-          <div class="filter-actions"><button id="clear" class="text-button" type="button">Clear filters</button></div>
+          <label class="field search-field"><span class="sr-only">Search contract or token</span><span class="search-icon" aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search contract, token or CoinGecko ID" aria-label="Search contract or token"></label>
+          <label class="field"><span class="sr-only">Market</span><select id="market" aria-label="Market"><option value="all">All markets</option><option value="USD-M">USDⓈ-M</option><option value="COIN-M">COIN-M</option></select></label>
+          <label class="field"><span class="sr-only">Contract type</span><select id="type" aria-label="Contract type"><option value="all">All types</option></select></label>
+          <label class="field"><span class="sr-only">Quote asset</span><select id="quote" aria-label="Quote asset"><option value="all">All quotes</option></select></label>
+          <details id="more-filters" class="more-filters">
+            <summary>More filters <span aria-hidden="true">⌄</span></summary>
+            <div class="advanced-fields">
+              <label>CoinGecko match<select id="gecko"><option value="all">Any</option><option value="matched">Matched</option><option value="unmatched">Unmatched</option></select></label>
+              <label>Min 24h quote volume<input id="minimumVolume" type="number" min="0" step="any" placeholder="Any"></label>
+              <label>Min CG open interest · USD<input id="minimumOpenInterest" type="number" min="0" step="any" placeholder="Any"></label>
+            </div>
+          </details>
+          <input id="sort" type="hidden" value="quoteVolume">
+          <input id="direction" type="hidden" value="desc">
+          <button id="clear" class="button button-subtle" type="button">Reset</button>
         </form>
-
-        <div class="table-wrap"><table><thead><tr><th>CONTRACT</th><th>TOKEN</th><th>MARKET</th><th>TYPE / LISTED</th><th class="numeric">LAST PRICE</th><th class="numeric">24H CHANGE</th><th class="numeric">BINANCE 24H VOL.</th><th class="numeric">CG OPEN INTEREST</th><th class="numeric">CG FUNDING</th><th>RESEARCH LINKS</th></tr></thead><tbody id="rows"><tr><td colspan="10" class="empty-state">Fetching market data…</td></tr></tbody></table></div>
-        <div class="table-footer"><span id="range">—</span><div class="pager"><button id="previous" type="button" disabled>← Previous</button><span id="page-number">—</span><button id="next" type="button" disabled>Next →</button></div></div>
+        <div class="list-toolbar">
+          <div class="list-caption"><span id="range">—</span><span class="caption-hint desktop-hint">Click a column heading to sort</span><span class="caption-hint mobile-hint">Swipe for more columns · tap a heading to sort</span></div>
+          <button id="export" class="button button-outline" type="button" disabled>Export CSV <span aria-hidden="true">↓</span></button>
+        </div>
+        <div class="table-wrap" role="region" aria-label="Binance futures contracts" tabindex="0">
+          <table>
+            <thead><tr>
+              <th data-sort="symbol" aria-sort="none"><button type="button">Contract <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th data-sort="baseAsset" aria-sort="none"><button type="button">Token <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th data-sort="market" aria-sort="none"><button type="button">Market <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th data-sort="contractType" aria-sort="none"><button type="button">Type <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th data-sort="onboardDate" aria-sort="none"><button type="button">Listed <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th class="numeric" data-sort="lastPrice" aria-sort="none"><button type="button">Last price <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th class="numeric" data-sort="priceChangePercent" aria-sort="none"><button type="button">24h change <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th class="numeric" data-sort="quoteVolume" aria-sort="descending"><button type="button">24h quote volume <span class="sort-icon" aria-hidden="true">↓</span></button></th>
+              <th class="numeric" data-sort="openInterestUsd" aria-sort="none"><button type="button">CG open interest <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th class="numeric" data-sort="fundingRate" aria-sort="none"><button type="button">CG funding <span class="sort-icon" aria-hidden="true">↕</span></button></th>
+              <th>Research links</th>
+            </tr></thead>
+            <tbody id="rows"><tr><td colspan="11" class="empty-state">Fetching market data…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span id="page-count">—</span><div class="pager"><button id="previous" type="button" disabled aria-label="Previous page">←</button><span id="page-number">—</span><button id="next" type="button" disabled aria-label="Next page">→</button></div></div>
       </section>
-
-      <footer><span>FUTURES ATLAS <span class="footer-dot">◆</span> PUBLIC DATA EXPERIMENT</span><span>Binance defines contract coverage · CoinGecko metrics are supplemental · Missing values are not zero</span></footer>
+      <section class="data-details" aria-label="Data source details">
+        <details id="source-details"><summary>Data source status <strong id="source-count">0 / 5</strong><span aria-hidden="true">⌄</span></summary><div id="source-list" class="source-list" aria-live="polite"></div></details>
+        <p id="notice" class="notice" role="status">The browser requests Binance directly. Results depend on your network and provider availability.</p>
+      </section>
+      <footer>Binance defines contract coverage. CoinGecko metrics are supplemental and may lag. Blank values mean unavailable, not zero.</footer>
     </main>
   </div>
 </body>

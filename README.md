@@ -14,6 +14,8 @@ A static GitHub Pages experiment that requests Binance Futures public market dat
 
 The page makes requests on load and on Refresh, with a two-minute in-memory cache. No credentials or user data are stored or transmitted by the site.
 
+The contract list supports text search, market/type/quote and supplemental-data filters, minimum volume and open-interest thresholds, CSV export, and sorting by clicking any sortable column heading. Click the same heading again to reverse its direction. On narrow screens, scroll the table horizontally to reach more columns.
+
 ## Run locally
 
 ```sh

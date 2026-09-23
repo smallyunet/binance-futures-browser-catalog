@@ -83,16 +83,40 @@ function renderRows() {
     const changeClass = row.priceChangePercent == null ? '' : row.priceChangePercent >= 0 ? 'positive' : 'negative';
     const changeText = row.priceChangePercent == null ? '—' : `${row.priceChangePercent > 0 ? '+' : ''}${formatNumber(row.priceChangePercent, 2)}%`;
     const links = externalLinks(row).map(link => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(row.baseAsset)} on ${escapeHtml(link.label)}">${escapeHtml(link.label)} ↗</a>`).join('');
-    return `<tr><td><div class="contract">${escapeHtml(row.symbol)}</div><div class="muted">${escapeHtml(row.quoteAsset)} quoted</div></td><td class="token">${escapeHtml(row.baseAsset)}</td><td><span class="badge ${row.market === 'USD-M' ? 'usdm' : 'coinm'}">${row.market === 'USD-M' ? 'USDⓈ-M' : 'COIN-M'}</span></td><td>${escapeHtml(row.contractType)}<div class="muted">${formatDate(row.onboardDate)}</div></td><td class="numeric">${formatPrice(row.lastPrice)}</td><td class="numeric ${changeClass}">${changeText}</td><td class="numeric">${formatNumber(row.quoteVolume, 0)}${row.quoteVolume == null ? '' : ` <span class="muted">${escapeHtml(row.quoteAsset)}</span>`}</td><td class="numeric">${formatNumber(row.openInterestUsd, 0)}</td><td class="numeric">${row.fundingRate == null ? '—' : `${formatNumber(row.fundingRate, 6)}%`}</td><td><div class="links">${links}</div></td></tr>`;
-  }).join('') : `<tr><td colspan="10" class="empty-state">${state.loading ? 'Fetching market data…' : state.rows.length ? 'No contracts match these filters.' : 'No Binance contracts available from this browser. Check the source status above.'}</td></tr>`;
+    return `<tr>
+      <td><div class="contract">${escapeHtml(row.symbol)}</div></td>
+      <td class="token">${escapeHtml(row.baseAsset)}</td>
+      <td><span class="badge ${row.market === 'USD-M' ? 'usdm' : 'coinm'}">${row.market === 'USD-M' ? 'USDⓈ-M' : 'COIN-M'}</span></td>
+      <td class="type">${escapeHtml(row.contractType)}</td>
+      <td>${formatDate(row.onboardDate)}</td>
+      <td class="numeric">${formatPrice(row.lastPrice)}</td>
+      <td class="numeric ${changeClass}">${changeText}</td>
+      <td class="numeric">${formatNumber(row.quoteVolume, 0)}${row.quoteVolume == null ? '' : ` <span class="volume-unit">${escapeHtml(row.quoteAsset)}</span>`}</td>
+      <td class="numeric">${formatNumber(row.openInterestUsd, 0)}</td>
+      <td class="numeric">${row.fundingRate == null ? '—' : `${formatNumber(row.fundingRate, 6)}%`}</td>
+      <td><div class="links">${links}</div></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="11" class="empty-state">${state.loading ? 'Fetching market data…' : state.rows.length ? 'No contracts match these filters.' : 'No Binance contracts available from this browser. Check the source status below.'}</td></tr>`;
   $('range').textContent = count ? `Showing ${formatNumber(start + 1)}–${formatNumber(Math.min(start + pageSize, count))} of ${formatNumber(count)} matching contracts` : 'No matching contracts';
+  $('page-count').textContent = count ? `${formatNumber(pageSize)} per page` : '—';
   $('page-number').textContent = count ? `${state.page} / ${pageCount}` : '—';
   $('previous').disabled = state.page <= 1;
   $('next').disabled = state.page >= pageCount;
 }
 
+function renderSortHeaders() {
+  const selected = $('sort').value;
+  const direction = $('direction').value;
+  for (const heading of document.querySelectorAll('th[data-sort]')) {
+    const active = heading.dataset.sort === selected;
+    heading.setAttribute('aria-sort', active ? direction === 'asc' ? 'ascending' : 'descending' : 'none');
+    heading.querySelector('.sort-icon').textContent = active ? direction === 'asc' ? '↑' : '↓' : '↕';
+  }
+}
+
 function updateFiltered() {
   state.filtered = filterAndSort(state.rows, filters());
+  renderSortHeaders();
   renderRows();
 }
 
@@ -138,10 +162,34 @@ function exportCsv() {
 }
 
 for (const id of filterIds) $(id).addEventListener(id === 'search' || id.startsWith('minimum') ? 'input' : 'change', () => { state.page = 1; updateFiltered(); });
+$('filters').addEventListener('submit', event => event.preventDefault());
+for (const heading of document.querySelectorAll('th[data-sort]')) {
+  heading.querySelector('button').addEventListener('click', () => {
+    const key = heading.dataset.sort;
+    const current = $('sort').value;
+    const alphabetic = ['symbol', 'baseAsset', 'market', 'contractType'].includes(key);
+    $('direction').value = current === key
+      ? $('direction').value === 'asc' ? 'desc' : 'asc'
+      : alphabetic ? 'asc' : 'desc';
+    $('sort').value = key;
+    state.page = 1;
+    document.querySelector('.table-wrap').scrollTop = 0;
+    updateFiltered();
+  });
+}
 $('refresh').addEventListener('click', () => refresh(true));
-$('clear').addEventListener('click', () => { $('filters').reset(); state.page = 1; updateFiltered(); });
+$('clear').addEventListener('click', () => {
+  $('filters').reset();
+  $('more-filters').open = false;
+  state.page = 1;
+  updateFiltered();
+});
 $('export').addEventListener('click', exportCsv);
-$('previous').addEventListener('click', () => { state.page--; renderRows(); });
-$('next').addEventListener('click', () => { state.page++; renderRows(); });
+$('previous').addEventListener('click', () => { state.page--; document.querySelector('.table-wrap').scrollTop = 0; renderRows(); });
+$('next').addEventListener('click', () => { state.page++; document.querySelector('.table-wrap').scrollTop = 0; renderRows(); });
+document.addEventListener('click', event => {
+  if (!$('more-filters').contains(event.target)) $('more-filters').open = false;
+});
 renderSources();
+renderSortHeaders();
 refresh();
