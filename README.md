@@ -12,7 +12,7 @@ A static GitHub Pages experiment that requests Binance Futures public market dat
 - Access depends on the visitor's network and Binance's availability and access rules. This experiment does not bypass provider restrictions.
 - CoinMarketCap has no verified token search URL for direct linking, so its per-token lookup opens a Google search restricted to CoinMarketCap currency pages. Symbol matches should be checked before relying on an asset identity.
 
-The page makes requests on load and on Refresh, with a two-minute in-memory cache. No credentials or user data are stored or transmitted by the site.
+The page makes requests on load and on Refresh. CoinGecko results are reused for up to ten minutes in browser session storage; Refresh fetches a new result. Other sources use the page's two-minute in-memory cache. No credentials or user data are stored or transmitted by the site.
 
 The contract list supports text search, market/type/quote and supplemental-data filters, minimum volume and open-interest thresholds, CSV export, and sorting by clicking any sortable column heading. Click the same heading again to reverse its direction. On narrow screens, scroll the table horizontally to reach more columns.
 

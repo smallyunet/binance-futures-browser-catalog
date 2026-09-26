@@ -12,17 +12,30 @@ export function numberOrNull(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-export async function fetchSource(source) {
+const GECKO_CACHE_MS = 10 * 60 * 1000;
+
+export async function fetchSource(source, { force = false } = {}) {
+  const cacheKey = `binance-futures-catalog:${source.id}`;
+  if (source.kind === 'gecko' && !force && typeof sessionStorage !== 'undefined') {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(cacheKey) ?? 'null');
+      if (saved?.url === source.url && saved.expiresAt > Date.now() && Array.isArray(saved.value?.tickers)) return saved.value;
+    } catch { /* Ignore unavailable or invalid browser storage. */ }
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
   try {
-    const response = await fetch(source.url, { signal: controller.signal, cache: 'no-store' });
+    const response = await fetch(source.url, { signal: controller.signal, cache: source.kind === 'gecko' && !force ? 'default' : 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const value = await response.json();
     const valid = source.kind === 'info' ? Array.isArray(value?.symbols)
       : source.kind === 'ticker' ? Array.isArray(value)
       : Array.isArray(value?.tickers);
     if (!valid) throw new Error('Invalid response');
+    if (source.kind === 'gecko' && typeof sessionStorage !== 'undefined') {
+      try { sessionStorage.setItem(cacheKey, JSON.stringify({ url: source.url, expiresAt: Date.now() + GECKO_CACHE_MS, value })); }
+      catch { /* Browser storage limits do not prevent a fresh response. */ }
+    }
     return value;
   } finally {
     clearTimeout(timer);

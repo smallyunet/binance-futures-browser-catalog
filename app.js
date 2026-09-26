@@ -129,7 +129,7 @@ async function refresh(force = false) {
   renderSources(); renderStatus(); renderRows();
   const results = await Promise.all(SOURCES.map(async source => {
     try {
-      const value = await fetchSource(source);
+      const value = await fetchSource(source, { force });
       state.sourceStates[source.id] = { status: 'ok', message: 'OK' };
       renderSources();
       return [source.id, value];
